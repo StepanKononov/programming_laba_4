@@ -6,6 +6,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 from tkcalendar import DateEntry
 from datetime import datetime
+import MNK as mnk
 
 t = []
 for x in list(range(0, 101)):
@@ -29,6 +30,8 @@ class Window:
         self.select_data_recovery = None
         self.select_time_interval = None
         self.interval = None
+        self.companies_data = None
+        self.select_company_data = None
 
         def row_generator(number):
             i = 0
@@ -39,15 +42,14 @@ class Window:
         row = row_generator(20)
         self.root = root
         self.root.title("Sin Wave")
-        self.root.geometry('600x550')
+        self.root.geometry('600x700')
         self.root.resizable(False, False)
 
         # Тикеры скачиваем из файла
         tik_f = open('tiker.txt')
         self.tickers = list((tik_f.readline().split()))
         # Доступные интервалы времени и текущий интервал
-        self.intervals = ['1m', '2m', '5m', '15m', '30m', '60m', '90m', '1h', '1d', '5d', '1wk', '1mo', '3mo']
-
+        self.intervals_str = ['1d', '5d', '1wk', '1mo', '3mo']
 
         # Доступные методы востановления данных
         self.data_recovery_methods = ['Winsoring', 'L-approx', 'C-recovery']
@@ -68,8 +70,8 @@ class Window:
         # Временной период взятия данных
         r = next(row)
         Label(self.root, text="Временной период").grid(row=r, column=0)
-        self.time_interval_entry = ttk.Combobox(self.root, width=width, values=self.intervals)
-        self.time_interval_entry.current(8)
+        self.time_interval_entry = ttk.Combobox(self.root, width=width, values=self.intervals_str)
+        self.time_interval_entry.current(0)
         self.time_interval_entry.grid(row=r, column=1)
 
         # Начальньная дата
@@ -88,7 +90,7 @@ class Window:
         r = next(row)
         Label(self.root, text="Методы востановления данных").grid(row=r, column=0)
         self.data_recovery_entry = ttk.Combobox(self.root, width=width, values=self.data_recovery_methods)
-        self.data_recovery_entry.current(0)
+        self.data_recovery_entry.current(2)
         self.data_recovery_entry.grid(row=r, column=1)
 
         # Доступные методы сглаживания
@@ -107,12 +109,42 @@ class Window:
 
         # Update Button
         r = next(row)
-        button1 = Button(self.root, text="Calculate", command=self.update_values)
-        button1.grid(row=r , column=0)
-        self.root.bind("<Return>", self.update_values)
-       # self.root.rowconfigure(r, weight=2)
+        button1 = Button(self.root, text="Calculate", command=self.data_validation)
+        button1.grid(row=r, column=0)
+        self.root.bind("<Return>", self.data_validation)
+
+        # Для ошибок
+        r = next(row)
+        self.error_label_text = StringVar()
+        self.error_label_text.set("")
+        self.error_label = Label(self.root, textvariable=self.error_label_text, font=('Arial', 9, 'bold'))
+        self.error_label.grid(row=r, column=0, columnspan=2, stick='we')
+
+        # self.root.rowconfigure(r, weight=2)
+        self.data_validation()
+
+    def data_validation(self):
+        er_color = '#FF6A90'
+        time_start = datetime.strptime(self.start_date_entry.get(), '%m/%d/%y')
+        time_end = datetime.strptime(self.finish_date_entry.get(), '%m/%d/%y')
+        if time_end < time_start:
+            self.error_label_text.set("Временной интервал содержит 0 дней, проверьте вернось заполнения.")
+            self.error_label.config(bg=er_color)
+            return None
+
+        self.error_label.config(bg='#F0F0F0')
+        self.error_label_text.set('')
 
         self.update_values()
+        self.get_data(self.select_start_date, self.select_finish_date, self.select_time_interval)
+
+        self.select_company_data = self.companies_data[self.select_ticker]
+        if len(self.select_company_data) <= 2:
+            self.error_label_text.set("Не удалось получить данные по данному тикету.")
+            self.error_label.config(bg=er_color)
+            return None
+
+        self.plot_values()
 
     def update_values(self, event=None):
         self.select_ticker = self.tikcer_entry.get()
@@ -123,47 +155,63 @@ class Window:
         self.select_finish_date = str(datetime.strptime(self.finish_date_entry.get(), '%m/%d/%y'))[:10]
         self.select_deviation = self.deviation_entry.get()
 
-
-        print(self.select_ticker, self.select_anti_aliasing, self.select_data_recovery, self.select_time_interval, self.select_start_date, self.select_finish_date, self.select_deviation)
-        self.plot_values()
+    # print(self.select_ticker, self.select_anti_aliasing, self.select_data_recovery, self.select_time_interval,
+    # self.select_start_date, self.select_finish_date, self.select_deviation)
+    # self.plot_values()
 
     def get_data(self, startDate, endDate, interval):
-        shares_data_t = dict()
+        self.companies_data = dict()
         for ticker in self.tickers:
             data = yf.Ticker(ticker)
-            shares_data_t[ticker] = list(data.history(start=startDate, end=endDate, interval=interval)['Close'])
-        return shares_data_t
+            history = data.history(start=startDate, end=endDate, interval=interval)['Close']
+
+            self.companies_data[ticker] = list(history)
 
     def plot_values(self):
-        """
         plt.close('all')
-        fig, ax = plt.subplots(figsize=(5, 4), dpi=100)
+        fig, ax = plt.subplots(figsize=(6, 5), dpi=100)
 
-        x = np.linspace(-5, 5, 100)
-
-        y = np.cos(x)
-
-        plt.plot(x, y)
-
-        ax.spines['left'].set_position('center')
-        ax.spines['bottom'].set_position('center')
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-
-        chart = FigureCanvasTkAgg(fig, self.root)
-
-        chart.get_tk_widget().grid(row=10, column=0, columnspan=2, stick='we')
-
-        """
-        plt.close('all')
-        fig, ax = plt.subplots(figsize=(5, 4), dpi=100)
-
-        y = self.get_data(self.select_start_date,  self.select_finish_date,   self.select_time_interval)[self.select_ticker]
+        fig.patch.set_facecolor('#F0F0F0')
+        y = self.select_company_data
         x = [i for i in range(len(y))]
+        deleted_data = mnk.rand_remove(y, 50)
 
-        print(y)
-        print(x)
-        plt.plot(x, y)
+        ax.set_facecolor('m')
+        plt.subplot(3, 1, 1)
+        plt.xticks([])
+        plt.yticks([])
+        plt.title('Данные до обработки')
+        plt.plot(x, y, color='#AFB1F5')
+
+        match self.select_data_recovery:
+            case 'Winsoring':
+                result_data = mnk.winsoring_resolve_data(deleted_data)
+            case 'L-approx':
+                result_data = mnk.mnk_resolve_data(deleted_data, x)
+            case _:
+                result_data = mnk.c_recovery(deleted_data, self.companies_data, self.select_ticker)
+        plt.subplot(3, 1, 2)
+        plt.xticks([])
+        plt.yticks([])
+        plt.title('Данные после востановления')
+        plt.plot(x, result_data, color='#70DCBA')
+        match self.select_anti_aliasing:
+            case 'MA':
+                d = self.select_deviation[:len(self.select_deviation) - 1]
+                d = int(d)
+                result_data = mnk.MA(result_data, d)
+            case _:
+                d = self.select_deviation[:len(self.select_deviation) - 1]
+                d = int(d)
+
+                result_data = mnk.WMA(result_data, d)
+        plt.subplot(3, 1, 3)
+        plt.xticks([])
+        plt.yticks([])
+        plt.title('Данные после сглаживания')
+        plt.plot(x, result_data, color='#FBC19C')
+        plt.tight_layout()
+
         chart = FigureCanvasTkAgg(fig, self.root)
         chart.get_tk_widget().grid(row=10, column=0, columnspan=2, stick='we')
 

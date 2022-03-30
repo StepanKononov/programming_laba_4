@@ -3,7 +3,10 @@ import math, random
 import matplotlib.pyplot as plt
 import random
 
+d = {'b': 9, 'a': 3, 'c': 7}
+sorted_tuple = dict(sorted(d.items(), key=lambda x: x[1]))
 
+print(sorted_tuple)
 
 def mnk(x: list, y: list):
     n = len(x)
@@ -79,7 +82,7 @@ def f(x):
     e = math.e
     return np.cos(2 * pi * x) * pow(e, -x)
 
-
+'''
 if True:
     X = np.arange(0, 5, 0.01)
     Y = [f(x) for x in X]
@@ -119,3 +122,4 @@ if True:
     plt.scatter(X, result_Y)
 
     plt.show()
+'''
