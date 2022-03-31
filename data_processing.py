@@ -1,6 +1,4 @@
 import numpy as np
-import math, random
-import matplotlib.pyplot as plt
 import random
 
 
@@ -92,7 +90,7 @@ def mnk_resolve_data(data_Y, data_X):
     return result_Y
 
 
-def winsoring_resolve_data(data_Y):
+def winsorizing_resolve_data(data_Y):
     result_Y = data_Y.copy()
     if np.isnan(result_Y[0]):
         for i in range(1, len(result_Y)):
@@ -140,12 +138,12 @@ def MA(points, deviation):
     deviation /= 100
 
     for i in range(0, period):
-        for step in range(period + i, i + 1, -1):
-            slice_period = points[i: step]
+        slice_period = points[0: i]
+        if len(slice_period) > 0:
             cur_point = sum(slice_period) / len(slice_period)
-            if abs(points[i] - cur_point) / max(cur_point, points[i]) <= deviation or step == i + 2:
-                smoothed_points.append(cur_point)
-                break
+            smoothed_points.append(cur_point)
+        else:
+            smoothed_points.append(points[i])
 
     for i in range(period, n):
         for step in range(period, 2, -1):
@@ -179,12 +177,12 @@ def weightedmovingaverage(Data, period):
     weighted = []
     for i in range(len(Data)):
         try:
-            total = np.arange(1, period + 1, 1)  # weight matrix
+            total = np.arange(1, period + 1, 1)
             matrix = Data[i - period + 1: i + 1, 3:4]
             matrix = np.ndarray.flatten(matrix)
-            matrix = total * matrix  # multiplication
-            wma = (matrix.sum()) / (total.sum())  # WMA
-            weighted = np.append(weighted, wma)  # add to array
+            matrix = total * matrix
+            wma = (matrix.sum()) / (total.sum())
+            weighted = np.append(weighted, wma)
         except ValueError:
             pass
     return weighted

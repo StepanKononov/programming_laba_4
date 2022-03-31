@@ -1,24 +1,243 @@
-import numpy as np
-import matplotlib.pyplot as plt
+from tkinter import *
+import yfinance as yf
+from tkinter import ttk
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from tkcalendar import DateEntry
+from datetime import datetime
+import data_processing as dp
+import tkinter.font as font
 
 
-def smooth_curve(points, factor=0.95):
-    smoothed_points = []
-    for point in points:
-        if smoothed_points:
-            previous = smoothed_points[-1]
-            smoothed_points.append(previous * factor + point * (1 - factor))
-        else:
-            smoothed_points.append(point)
-    return smoothed_points
+def main():
+    root = Tk()
+    gui = Window(root)
+    gui.root.mainloop()
+    return None
 
 
-# acc=np.random.randn(100)
-acc = [117.93780370380563, 117.57896862710629, 119.41547666528245, 118.84549481408254, 121.36840057373047, 122.00470733642578, 118.54996629824478, 117.98001482933292, 115.42575561832328, 119.71907043457031, 119.17436981201172, 111.18280832791777, 110.48621335499469, 106.60210114128853, 114.57252502441406, 117.22977447509766, 111.43616622794563, 112.47046033251637, 119.0980224609375, 111.45724140842124, 108.6285592443375, 105.41995669564946, 106.11656179600189, 101.02920970132236, 96.976222603219, 98.79159469634347, 101.1769790229559, 101.1769790229559, 109.24559783935547, 99.34051149449714, 98.93939440026507, 98.28500042543993, 98.60165475890003, 100.33263498325798, 102.00026813703694, 102.27689886970917, 101.28924157729132, 103.35945017512863, 105.55906706518948, 103.22677612304688, 108.8153191689653, 108.62120673063, 108.19390106201172, 108.06055224186066, 109.44069805870511, 103.48567962646484, 109.54854505384428, 112.05003023051546, 112.11469386690982, 114.52992372781422, 112.89104234595752, 111.53246795362678, 109.850453850172, 109.65633128440736, 109.46223910093076, 108.92314590924578, 109.37598378516398, 106.9521255493164, 106.05501740784706, 106.96073366940088, 107.17639727739119, 109.31128976648158, 110.13075071226862, 110.66988441367101, 111.68343754293466, 112.33036760232947, 112.39505149358254, 107.27973937988281, 113.32231892479138, 112.9772976617243, 110.4111184663707, 105.85301208496094, 110.10915903289623, 106.52408599853516, 110.56206780081989, 105.53067016601562, 109.57007596864058, 110.26013874963346, 110.4326291263083, 112.45976576712366, 112.33036760232947, 112.95572623721058, 112.99883870394994, 113.92615677230552, 114.37901490308244, 107.30087280273438, 114.70247486906517, 111.68343754293466, 100.85943603515625, 96.17765045166016, 95.6177393577524, 88.27777099609375, 90.20501321294314, 88.47984613303161, 88.47984613303161, 95.57462689101304, 92.94374354954768, 95.25112641531291, 94.41011429987084, 88.00542670517035, 91.77925121326419, 93.53754511457682, 94.1252600945671, 96.19444582204015, 90.14308166503906, 98.1315496159415, 97.75733097406079, 98.39569322822622, 93.24491882324219, 95.37996757149288, 93.2227643555463, 89.55126953125, 91.0942611694336, 97.31709162025292, 95.51207988735264, 91.81399842336114, 93.72907505842808, 94.3673968028761, 96.43658253034916, 95.44599841084938, 92.95862074326159, 87.53799438476562, 92.60641913278594, 86.97122374746377, 76.4272582928904, 75.06249097751265, 83.18907165527344, 77.74800673660204, 82.91432189941406, 76.00902077934359, 72.53105392854134, 71.49647625594885, 71.01221296676019, 75.1725558796793, 80.2134028187875, 84.30774021092347, 85.45239291311196, 83.50614166259766, 84.41779498566076, 86.13477910265817, 86.42091949148926, 84.55769348144531, 83.05301754285365, 85.646240234375, 83.58133008599647, 89.52469301898417, 89.27120208740234, 92.41529083251953, 98.19758045529801, 96.96490013720664, 97.14098575130043, 94.6755846054003, 97.27306768487215, 98.83595283689277, 102.99630081352656, 102.18183269040864, 95.79718017578125, 97.29507458884785, 99.76045547988929, 100.48344253369628, 98.07466888427734, 97.80000796133814, 94.96138066163353, 94.40696466934325, 89.6939468383789, 89.81639336652793, 90.03812330469839, 85.51412963867188, 89.48370731240813, 94.69527232805507, 98.70929920545223, 94.18521447631412, 89.97158609387442, 88.35265574783554, 97.49341583251953, 90.03812330469839, 89.81639336652793, 89.52803507066939, 85.55838658868024, 81.67746957893374, 82.94150948200476, 82.71977448011964, 90.306884765625, 82.34277079516792, 81.32262977311264, 83.14112111447665, 82.91935066658881, 81.74397134375498, 80.36901077073729, 82.58670005847172, 90.22764587402344, 80.7238303216997, 80.94560076958754, 80.85689461591826, 90.54997253417969, 80.85689461591826, 80.85689461591826, 80.85689461591826, 90.32641070855149, 90.43733644221281, 92.36667249780335, 91.81228688780114, 94.32289123535156, 96.114560659334, 96.22548639299532, 98.02183532714844, 96.95442199707031, 97.40885925292969, 93.94124470329291, 94.14084620833546, 83.14338684082031, 94.91703264851355, 94.384826108786, 97.24559196904788, 98.02179866408468, 98.99940490722656, 96.58032113510174, 96.58032113510174, 96.04804370336873, 97.24559196904788, 82.90380506253786, 95.47144864080383, 97.84440661160484, 101.49356079101562, 100.23949301553378, 98.37664353362045, 97.97747090582342, 97.60045709344234, 83.07345975899493, 94.45131268246323, 91.73422241210938, 86.11300659179688, 96.02587476052344, 98.39880234903642, 83.6389703501372, 99.10844145096121, 98.70929920545223, 105.87993440925882, 93.43117672412261, 95.33838434658524, 95.02792799988683, 96.46942578372847, 105.2664794921875, 94.25174155970873, 92.76587550788842, 92.61064227082454, 98.2966079711914, 90.8143097448765, 91.08043833331364, 91.70137128156917, 90.14902878350101, 89.06234548690709, 86.82248219261268]
+class Window:
+    def __init__(self, root):
+        self.select_deviation = None
+        self.select_start_date = None
+        self.select_finish_date = None
+        self.select_ticker = None
+        self.select_anti_aliasing = None
+        self.select_data_recovery = None
+        self.select_time_interval = None
+        self.interval = None
+        self.companies_data = None
+        self.select_company_data = None
 
-plt.figure(figsize=(10, 7))
-plt.grid(True)
+        def row_generator(number):
+            i = 0
+            while i < number:
+                yield i
+                i += 1
 
-plt.plot(range(len(acc)), acc, 'b', label='Smoothed training acc',color='red')
-plt.plot(range(len(acc)), smooth_curve(acc), 'b', label='Smoothed training acc')
-plt.show()
+        row = row_generator(20)
+        self.root = root
+        self.root.title("Лабораторная работа № 3")
+        self.root.geometry('600x720')
+        self.root.resizable(False, False)
+
+        # Тикеры скачиваем из файла
+        tik_f = open('tiker.txt')
+        self.tickers = list((tik_f.readline().split()))
+        # Доступные интервалы времени и текущий интервал
+        self.intervals_str = ['1d', '5d', '1wk', '1mo', '3mo']
+
+        # Доступные методы востановления данных
+        self.data_recovery_methods = ['Winsoring', 'L-approx', 'C-recovery']
+        # Доступные методы сглаживания данных
+        self.anti_aliasing_methods = ['MA', 'WMA']
+        # Доступные отклонения
+        self.deviations = [str(i) + '%' for i in range(0, 105, 5)]
+
+        width = 10
+
+        # Тикеры
+        r = next(row)
+        Label(self.root, text="Тикер").grid(row=r, column=0)
+        self.tikcer_entry = ttk.Combobox(self.root, width=width, values=self.tickers)
+        self.tikcer_entry.current(0)
+        self.tikcer_entry.grid(row=r, column=1)
+
+        # Временной период взятия данных
+        r = next(row)
+        Label(self.root, text="Временной период").grid(row=r, column=0)
+        self.time_interval_entry = ttk.Combobox(self.root, width=width, values=self.intervals_str)
+        self.time_interval_entry.current(0)
+        self.time_interval_entry.grid(row=r, column=1)
+
+        # Начальньная дата
+        r = next(row)
+        Label(self.root, text="Начальньная дата").grid(row=r, column=0)
+        self.start_date_entry = DateEntry(self.root, width=width, bg="darkblue", fg="white", year=2011)
+        self.start_date_entry.grid(row=r, column=1)
+
+        # Конечная дата
+        r = next(row)
+        Label(self.root, text="Конечная дата").grid(row=r, column=0)
+        self.finish_date_entry = DateEntry(self.root, width=width, bg="darkblue", fg="white", year=2012)
+        self.finish_date_entry.grid(row=r, column=1)
+
+        # Методы востановления данных
+        r = next(row)
+        Label(self.root, text="Методы востановления данных").grid(row=r, column=0)
+        self.data_recovery_entry = ttk.Combobox(self.root, width=width, values=self.data_recovery_methods)
+        self.data_recovery_entry.current(2)
+        self.data_recovery_entry.grid(row=r, column=1)
+
+        # Доступные методы сглаживания
+        r = next(row)
+        Label(self.root, text="Методы сглаживания").grid(row=r, column=0)
+        self.anti_aliasing_entry = ttk.Combobox(self.root, width=width, values=self.anti_aliasing_methods)
+        self.anti_aliasing_entry.current(0)
+        self.anti_aliasing_entry.grid(row=r, column=1)
+
+        # Допустимое отклонение
+        r = next(row)
+        Label(self.root, text="Допустимое отклонение (%)").grid(row=r, column=0)
+        self.deviation_entry = ttk.Combobox(self.root, width=width, values=self.deviations)
+        self.deviation_entry.current(0)
+        self.deviation_entry.grid(row=r, column=1)
+
+        # Update Button
+        r = next(row)
+        button1 = Button(self.root, text="Calculate", command=self.data_validation, background='#D3CBBD', height=1,
+                         width=30, activebackground='#B8B1A5', font=font.Font(size=12), )
+        button1.grid(row=r, column=0, columnspan=2, pady=10)
+        self.root.bind("<Return>", self.data_validation)
+
+        # Для ошибок
+        r = next(row)
+        self.error_label_text = StringVar()
+        self.error_label_text.set("")
+        self.error_label = Label(self.root, textvariable=self.error_label_text, font=('Arial', 9, 'bold'))
+        self.error_label.grid(row=r, column=0, columnspan=2, stick='we')
+
+        self.make_placeholder()
+
+    def make_placeholder(self):
+        fig, ax = plt.subplots(figsize=(6, 5), dpi=100)
+
+        fig.patch.set_facecolor('#F0F0F0')
+
+        plt.subplot(3, 1, 1)
+        plt.xticks([])
+        plt.yticks([])
+        plt.title('Данные до обработки')
+        plt.plot([], [])
+
+        plt.subplot(3, 1, 2)
+        plt.xticks([])
+        plt.yticks([])
+        plt.title('Данные после востановления')
+        plt.plot([], [])
+
+        plt.subplot(3, 1, 3)
+        plt.xticks([])
+        plt.yticks([])
+        plt.title('Данные после сглаживания')
+        plt.plot([], [])
+
+        plt.tight_layout()
+        chart = FigureCanvasTkAgg(fig, self.root)
+        chart.get_tk_widget().grid(row=10, column=0, columnspan=2, stick='we')
+
+    def data_validation(self):
+        er_color = '#D3CBBD'
+        time_start = datetime.strptime(self.start_date_entry.get(), '%m/%d/%y')
+        time_end = datetime.strptime(self.finish_date_entry.get(), '%m/%d/%y')
+        if time_end < time_start:
+            self.error_label_text.set("Временной интервал содержит 0 дней, проверьте вернось заполнения.")
+            self.error_label.config(bg=er_color)
+            return None
+
+        self.error_label.config(bg='#F0F0F0')
+        self.error_label_text.set('')
+
+        self.update_values()
+        self.get_data(self.select_start_date, self.select_finish_date, self.select_time_interval)
+
+        self.select_company_data = self.companies_data[self.select_ticker]
+        if len(self.select_company_data) <= 2:
+            self.error_label_text.set("Не удалось получить данные по данному тикету.")
+            self.error_label.config(bg=er_color)
+            return None
+
+        self.plot_values()
+
+    def update_values(self, event=None):
+        self.select_ticker = self.tikcer_entry.get()
+        self.select_anti_aliasing = self.anti_aliasing_entry.get()
+        self.select_data_recovery = self.data_recovery_entry.get()
+        self.select_time_interval = self.time_interval_entry.get()
+        self.select_start_date = str(datetime.strptime(self.start_date_entry.get(), '%m/%d/%y'))[:10]
+        self.select_finish_date = str(datetime.strptime(self.finish_date_entry.get(), '%m/%d/%y'))[:10]
+        self.select_deviation = self.deviation_entry.get()
+
+    def get_data(self, startDate, endDate, interval):
+        self.companies_data = dict()
+        for ticker in self.tickers:
+            try:
+                data = yf.Ticker(ticker)
+                history = data.history(start=startDate, end=endDate, interval=interval)['Close']
+                self.companies_data[ticker] = list(history)
+            except ValueError:
+                self.companies_data[ticker] = []
+                print("GET DATA ERROR")
+                pass
+
+    def plot_values(self):
+        plt.close('all')
+        fig, ax = plt.subplots(figsize=(6, 5), dpi=100)
+
+        fig.patch.set_facecolor('#F0F0F0')
+        y = self.select_company_data
+        x = [i for i in range(len(y))]
+        deleted_data = dp.rand_remove(y, 50)
+
+        ax.set_facecolor('m')
+        plt.subplot(3, 1, 1)
+        plt.xticks([])
+        plt.yticks([])
+        plt.title('Данные до обработки')
+        plt.plot(x, y, color='#403D3C')
+
+        match self.select_data_recovery:
+            case 'Winsoring':
+                result_data = dp.winsorizing_resolve_data(deleted_data)
+            case 'L-approx':
+                result_data = dp.mnk_resolve_data(deleted_data, x)
+            case _:
+                result_data = dp.c_recovery(deleted_data, self.companies_data, self.select_ticker)
+        plt.subplot(3, 1, 2)
+        plt.xticks([])
+        plt.yticks([])
+        plt.title('Данные после востановления')
+        plt.plot(x, result_data, color='#456F74')
+        match self.select_anti_aliasing:
+            case 'MA':
+                d = self.select_deviation[:len(self.select_deviation) - 1]
+                d = int(d)
+                result_data = dp.MA(result_data, d)
+            case _:
+                d = self.select_deviation[:len(self.select_deviation) - 1]
+                d = int(d)
+
+                result_data = dp.WMA(result_data, d)
+        plt.subplot(3, 1, 3)
+        plt.xticks([])
+        plt.yticks([])
+        plt.title('Данные после сглаживания')
+        plt.plot(x, result_data, color='#BD462B')
+        plt.tight_layout()
+
+        chart = FigureCanvasTkAgg(fig, self.root)
+        chart.get_tk_widget().grid(row=10, column=0, columnspan=2, stick='we')
+
+
+if __name__ == '__main__':
+    main()
